@@ -76,7 +76,15 @@ Mở http://localhost:3000
 1. Push code lên GitHub
 2. Import project trên [vercel.com](https://vercel.com)
 3. Thêm biến môi trường (giống `.env.local`, gồm Telegram + `CRON_SECRET`)
-4. Deploy — Vercel Cron gọi `/api/cron/voting-close` mỗi phút để đóng bình chọn và gửi thống kê Telegram
+4. Deploy
+
+### Cron đóng bình chọn (gói Hobby miễn phí)
+
+Vercel Hobby **không** cho cron mỗi phút. Dùng [cron-job.org](https://cron-job.org) (miễn phí):
+
+- URL: `https://<domain-vercel>/api/cron/voting-close`
+- Lịch: mỗi phút (`* * * * *`)
+- Header: `Authorization: Bearer <CRON_SECRET>`
 
 ## Đăng nhập
 
