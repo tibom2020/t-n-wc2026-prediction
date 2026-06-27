@@ -91,9 +91,6 @@ export default function LoginPage() {
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
-        <p className="mt-4 text-center text-xs text-gray-400">
-          Nhập số điện thoại đã đăng ký để đăng nhập
-        </p>
       </div>
     </div>
   );
