@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ prediction: existing });
       }
       await updatePredictionChoice(existing.predictionId, choice);
-      void sendPredictionTelegram(match, session.fullName, false);
+      await sendPredictionTelegram(match, session.fullName, false);
       return NextResponse.json({
         prediction: { ...existing, choice },
         updated: true,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       userName: session.fullName,
       choice,
     });
-    void sendPredictionTelegram(match, session.fullName, true);
+    await sendPredictionTelegram(match, session.fullName, true);
     return NextResponse.json({ prediction });
   } catch (e) {
     console.error(e);

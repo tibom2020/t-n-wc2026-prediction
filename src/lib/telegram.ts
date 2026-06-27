@@ -4,9 +4,14 @@ import { choiceLabels } from "@/lib/choice-styles";
 import type { Choice, HandicapResult } from "@/types";
 
 function getConfig() {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return null;
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  if (!token || !chatId) {
+    console.warn(
+      "Telegram skipped: set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in environment variables."
+    );
+    return null;
+  }
   return { token, chatId };
 }
 

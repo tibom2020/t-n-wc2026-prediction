@@ -72,7 +72,7 @@ export async function POST(
       missedCount += 1;
     }
 
-    void notifyMatchSettled({
+    await notifyMatchSettled({
       matchStt: match.stt,
       homeTeam: match.homeTeam,
       awayTeam: match.awayTeam,

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       handicap: parseHandicap(handicap),
       kickoff: kickoffIso,
     });
-    void notifyMatchCreated({
+    await notifyMatchCreated({
       matchStt: match.stt,
       homeTeam: match.homeTeam,
       awayTeam: match.awayTeam,
