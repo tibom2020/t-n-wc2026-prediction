@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  getMatches,
-  getPredictions,
-  getUsers,
-  closeMatchVoting,
-} from "@/lib/sheets";
-import { notifyVotingClosed } from "@/lib/telegram";
-import type { Choice } from "@/types";
+import { getMatches } from "@/lib/sheets";
+import { closeMatchWithNotification } from "@/lib/voting-close";
 
 function isKickoffPassed(kickoff: string): boolean {
   if (!kickoff) return false;
@@ -23,11 +17,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [matches, predictions, users] = await Promise.all([
-      getMatches(),
-      getPredictions(),
-      getUsers(),
-    ]);
+    const matches = await getMatches();
 
     const due = matches.filter(
       (m) =>
@@ -37,34 +27,7 @@ export async function GET(request: Request) {
     );
 
     for (const match of due) {
-      const matchPredictions = predictions.filter(
-        (p) => p.matchId === match.matchId && p.choice
-      );
-      const predictedUserStts = new Set(matchPredictions.map((p) => p.userStt));
-
-      const stats: Record<Choice, string[]> = {
-        HOME: [],
-        AWAY: [],
-        DRAW: [],
-      };
-      for (const p of matchPredictions) {
-        if (p.choice) stats[p.choice].push(p.userName);
-      }
-
-      const notChosen = users
-        .filter((u) => !predictedUserStts.has(u.stt))
-        .map((u) => u.fullName);
-
-      await notifyVotingClosed({
-        matchStt: match.stt,
-        homeTeam: match.homeTeam,
-        awayTeam: match.awayTeam,
-        handicap: match.handicap,
-        stats,
-        notChosen,
-      });
-
-      await closeMatchVoting(match.matchId);
+      await closeMatchWithNotification(match);
     }
 
     return NextResponse.json({ processed: due.length });

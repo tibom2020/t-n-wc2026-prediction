@@ -90,22 +90,6 @@ Vercel Hobby **không** cho cron mỗi phút. Dùng [cron-job.org](https://cron-
 
 Đăng nhập bằng **số điện thoại** đã đăng ký (10 số, bắt đầu bằng 0).
 
-| STT | Họ tên | SDT | Vai trò |
-|-----|--------|-----|---------|
-| 1 | Phan Viet Linh | 0914937339 | admin |
-| 2 | Vu Ba Liem | 0933955739 | user |
-| 3 | Le Van Khang | 0913616174 | user |
-| 4 | Nguyen Huynh Khuong | 0909174080 | user |
-| 5 | Tran Dinh Tu | 0908257297 | user |
-| 6 | Pham Ngoc Duy | 0934973585 | user |
-| 7 | Le Huu Phuc | 0914662097 | user |
-| 8 | Truong Hoang Du | 0909477341 | user |
-| 9 | Huynh Van Thanh Huyen | 0973313381 | user |
-| 10 | Duong Thanh Liem | 0937357286 | user |
-| 11 | Nguyen Xuan Son | 0988123978 | user |
-| 12 | Mai Hung Cuong | 0797067879 | user |
-| 13 | Le Minh Thang | 0919841122 | user |
-| 14 | Nguyen Ngoc Tien | 0946428478 | user |
 
 ## Quy tắc đóng góp
 

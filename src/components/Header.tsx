@@ -24,12 +24,10 @@ export function Header({ user }: { user: SessionUser }) {
         </div>
         <nav className="flex items-center gap-3 text-sm">
           <Link href="/" className="hover:text-wc-gold">Dự đoán</Link>
+          <Link href="/stats" className="hover:text-wc-gold">Thống kê</Link>
           <Link href="/history" className="hover:text-wc-gold">Lịch sử</Link>
           {user.title === "admin" && (
-            <>
-              <Link href="/admin/matches" className="hover:text-wc-gold">Trận</Link>
-              <Link href="/admin/predictions" className="hover:text-wc-gold">Thống kê</Link>
-            </>
+            <Link href="/admin/matches" className="hover:text-wc-gold">Trận</Link>
           )}
           <button onClick={logout} className="rounded bg-white/10 px-2 py-1 hover:bg-white/20">
             Thoát

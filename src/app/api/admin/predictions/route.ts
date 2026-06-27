@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getPredictions, getMatches } from "@/lib/sheets";
+import { getPredictionBoardRows } from "@/lib/prediction-board";
 
 export async function GET() {
   try {
@@ -9,45 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const [predictions, matches] = await Promise.all([
-      getPredictions(),
-      getMatches(),
-    ]);
-
-    const matchMap = new Map(matches.map((m) => [m.matchId, m]));
-
-    const rows = predictions
-      .map((p) => {
-        const match = matchMap.get(p.matchId);
-        return {
-          predictionId: p.predictionId,
-          userStt: p.userStt,
-          userName: p.userName,
-          choice: p.choice,
-          contribution: p.contribution,
-          createdAt: p.createdAt,
-          match: match
-            ? {
-                stt: match.stt,
-                homeTeam: match.homeTeam,
-                awayTeam: match.awayTeam,
-                handicap: match.handicap,
-                kickoff: match.kickoff,
-                status: match.status,
-                handicapResult: match.handicapResult,
-                homeScore: match.homeScore,
-                awayScore: match.awayScore,
-              }
-            : null,
-        };
-      })
-      .sort((a, b) => {
-        const matchSttA = a.match?.stt ?? 0;
-        const matchSttB = b.match?.stt ?? 0;
-        if (matchSttA !== matchSttB) return matchSttA - matchSttB;
-        return a.userStt - b.userStt;
-      });
-
+    const rows = await getPredictionBoardRows();
     return NextResponse.json({ rows, total: rows.length });
   } catch (e) {
     console.error(e);

@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { parseDatetimeLocalAsGMT7 } from "@/lib/datetime";
 import { parseHandicap } from "@/lib/utils";
-import { getMatches, createMatch, updateMatchStatus } from "@/lib/sheets";
+import { getMatchById, getMatches, createMatch, updateMatchStatus } from "@/lib/sheets";
 import { notifyMatchCreated } from "@/lib/telegram";
+import { closeMatchWithNotification } from "@/lib/voting-close";
 
 export async function GET() {
   try {
@@ -58,6 +59,17 @@ export async function PATCH(request: Request) {
     const { matchId, status } = await request.json();
     if (!matchId || !status) {
       return NextResponse.json({ error: "Thiếu thông tin" }, { status: 400 });
+    }
+    if (status === "closed") {
+      const match = await getMatchById(matchId);
+      if (!match) {
+        return NextResponse.json({ error: "Không tìm thấy trận" }, { status: 404 });
+      }
+      if (match.status === "settled") {
+        return NextResponse.json({ error: "Trận đã kết thúc" }, { status: 400 });
+      }
+      await closeMatchWithNotification(match);
+      return NextResponse.json({ ok: true });
     }
     await updateMatchStatus(matchId, status);
     return NextResponse.json({ ok: true });

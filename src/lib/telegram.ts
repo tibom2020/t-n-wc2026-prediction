@@ -1,6 +1,7 @@
 import { formatHandicapLine } from "@/lib/utils";
 import { formatGMT7 } from "@/lib/datetime";
-import type { Choice } from "@/types";
+import { choiceLabels } from "@/lib/choice-styles";
+import type { Choice, HandicapResult } from "@/types";
 
 function getConfig() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -62,11 +63,11 @@ export function formatVotingClosedMessage(data: {
   const missedList = formatList(data.notChosen);
 
   return (
-    `🔒 <b>Hết giờ bình chọn</b>\n` +
+    `🔒 <b>Đã kết thúc bình chọn</b>\n` +
     `Trận #${data.matchStt}: ${escapeHtml(data.homeTeam)} vs ${escapeHtml(data.awayTeam)}\n` +
     `Kèo: ${escapeHtml(line)}\n\n` +
-    `🔵 HOME (${data.stats.HOME.length}): ${homeList}\n` +
-    `🟠 AWAY (${data.stats.AWAY.length}): ${awayList}\n` +
+    `🔵 ${escapeHtml(data.homeTeam)} — HOME (${data.stats.HOME.length}): ${homeList}\n` +
+    `🟠 ${escapeHtml(data.awayTeam)} — AWAY (${data.stats.AWAY.length}): ${awayList}\n` +
     `⚪ HÒA (${data.stats.DRAW.length}): ${drawList}\n` +
     `❌ Chưa chọn (${data.notChosen.length}): ${missedList}`
   );
@@ -147,6 +148,70 @@ export async function notifyVotingClosed(data: {
   notChosen: string[];
 }): Promise<void> {
   await sendTelegramMessage(formatVotingClosedMessage(data));
+}
+
+export function formatMatchSettledMessage(data: {
+  matchStt: number;
+  homeTeam: string;
+  awayTeam: string;
+  handicap: number;
+  homeScore: number;
+  awayScore: number;
+  handicapResult: HandicapResult;
+  contributions: Array<{
+    userName: string;
+    choice: Choice | null;
+    contribution: number;
+  }>;
+}): string {
+  const line = formatHandicapLine(data.homeTeam, data.awayTeam, data.handicap);
+  const winner =
+    data.handicapResult === "HOME"
+      ? escapeHtml(data.homeTeam)
+      : data.handicapResult === "AWAY"
+        ? escapeHtml(data.awayTeam)
+        : "HÒA kèo";
+  const totalContribution = data.contributions.reduce(
+    (sum, row) => sum + row.contribution,
+    0
+  );
+  const contributionLines = data.contributions
+    .slice()
+    .sort((a, b) => a.userName.localeCompare(b.userName, "vi"))
+    .map((row) => {
+      const choiceText = row.choice ? choiceLabels[row.choice] : "Không dự đoán";
+      const amountText = row.contribution === 0 ? "0" : `-${row.contribution}`;
+      return `• ${escapeHtml(row.userName)}: ${amountText} (${choiceText})`;
+    })
+    .join("\n");
+
+  return (
+    `🏁 <b>Kết quả trận</b>\n` +
+    `Trận #${data.matchStt}: ${escapeHtml(data.homeTeam)} vs ${escapeHtml(data.awayTeam)}\n` +
+    `Tỉ số: <b>${data.homeScore}-${data.awayScore}</b>\n` +
+    `Kèo: ${escapeHtml(line)}\n` +
+    `Thắng kèo: <b>${winner}</b> (${choiceLabels[data.handicapResult]})\n\n` +
+    `📋 <b>Đóng góp theo thành viên</b>\n` +
+    `${contributionLines || "—"}\n\n` +
+    `Tổng đóng góp trận: <b>${totalContribution}</b>`
+  );
+}
+
+export async function notifyMatchSettled(data: {
+  matchStt: number;
+  homeTeam: string;
+  awayTeam: string;
+  handicap: number;
+  homeScore: number;
+  awayScore: number;
+  handicapResult: HandicapResult;
+  contributions: Array<{
+    userName: string;
+    choice: Choice | null;
+    contribution: number;
+  }>;
+}): Promise<void> {
+  await sendTelegramMessage(formatMatchSettledMessage(data));
 }
 
 function formatList(names: string[]): string {

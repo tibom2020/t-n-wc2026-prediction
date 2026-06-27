@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { MatchCard } from "@/components/MatchCard";
 import type { PredictionStats } from "@/components/PredictionStatsBars";
@@ -75,7 +76,15 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <Header user={user} />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h2 className="mb-4 text-xl font-bold text-wc-dark">Trận đang mở</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-xl font-bold text-wc-dark">Trận đang mở</h2>
+          <Link
+            href="/stats"
+            className="shrink-0 rounded-lg bg-wc-gold px-3 py-1.5 text-sm font-semibold text-wc-dark hover:bg-yellow-400"
+          >
+            Thống kê đóng góp
+          </Link>
+        </div>
         {matches.length === 0 ? (
           <p className="text-center text-gray-500 py-8">Chưa có trận nào để dự đoán</p>
         ) : (

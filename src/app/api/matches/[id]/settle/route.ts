@@ -9,6 +9,8 @@ import {
   updatePredictionContribution,
   createMissedPrediction,
 } from "@/lib/sheets";
+import { notifyMatchSettled } from "@/lib/telegram";
+import type { Choice } from "@/types";
 
 export async function POST(
   request: Request,
@@ -36,11 +38,21 @@ export async function POST(
     const [predictions, users] = await Promise.all([getPredictions(), getUsers()]);
     const matchPredictions = predictions.filter((p) => p.matchId === id);
     const predictedUserStts = new Set(matchPredictions.map((p) => p.userStt));
+    const contributions: Array<{
+      userName: string;
+      choice: Choice | null;
+      contribution: number;
+    }> = [];
 
     for (const p of matchPredictions) {
       if (!p.choice) continue;
       const contribution = calcContribution(p.choice, handicapResult);
       await updatePredictionContribution(p.predictionId, contribution);
+      contributions.push({
+        userName: p.userName,
+        choice: p.choice,
+        contribution,
+      });
     }
 
     let missedCount = 0;
@@ -52,8 +64,24 @@ export async function POST(
         userName: user.fullName,
         contribution: MISSING_PREDICTION_CONTRIBUTION,
       });
+      contributions.push({
+        userName: user.fullName,
+        choice: null,
+        contribution: MISSING_PREDICTION_CONTRIBUTION,
+      });
       missedCount += 1;
     }
+
+    void notifyMatchSettled({
+      matchStt: match.stt,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      handicap: match.handicap,
+      homeScore: hScore,
+      awayScore: aScore,
+      handicapResult,
+      contributions,
+    });
 
     return NextResponse.json({
       handicapResult,
