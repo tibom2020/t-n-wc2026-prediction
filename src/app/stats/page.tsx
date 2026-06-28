@@ -8,7 +8,7 @@ import { ContributionsBoardTable } from "@/components/ContributionsBoardTable";
 import type { PredictionBoardRow, UserContributionTotal } from "@/lib/prediction-board";
 import type { UserOutcomeTotal } from "@/lib/prediction-outcome";
 import { sumOutcomeTotals } from "@/lib/prediction-outcome";
-import { resolveLeaderboardOutcomeTotals, type PhaseFilter } from "@/lib/phase-outcomes";
+import { resolveLeaderboardContributionTotals, resolveLeaderboardOutcomeTotals, type PhaseFilter } from "@/lib/phase-outcomes";
 import type { SessionUser } from "@/types";
 
 type StatsViewMode = "outcome" | "contribution";
@@ -140,9 +140,10 @@ export default function StatsPage() {
     return <div className="flex min-h-screen items-center justify-center">Đang tải...</div>;
   }
 
-  const grandTotal = userTotals.reduce((sum, u) => sum + u.total, 0);
   const effectiveViewMode: StatsViewMode = isAdmin ? viewMode : "outcome";
   const displayOutcomeTotals = resolveLeaderboardOutcomeTotals(userOutcomeTotals, phaseFilter);
+  const displayContributionTotals = resolveLeaderboardContributionTotals(userTotals, phaseFilter);
+  const grandTotal = displayContributionTotals.reduce((sum, u) => sum + u.total, 0);
 
   return (
     <div className="min-h-screen">
@@ -194,16 +195,19 @@ export default function StatsPage() {
           </div>
         )}
 
+        {(effectiveViewMode === "outcome" || effectiveViewMode === "contribution") && (
+          <PhaseToggle value={phaseFilter} onChange={setPhaseFilter} />
+        )}
+
         {effectiveViewMode === "outcome" && (
           <>
-            <PhaseToggle value={phaseFilter} onChange={setPhaseFilter} />
             {displayOutcomeTotals.length > 0 && (
               <OutcomeLeaderboardTable totals={displayOutcomeTotals} />
             )}
           </>
         )}
 
-        {effectiveViewMode === "contribution" && userTotals.length > 0 && (
+        {effectiveViewMode === "contribution" && displayContributionTotals.length > 0 && (
           <div className="mb-6 overflow-hidden rounded-xl border border-green-200 bg-white shadow-sm">
             <div className="bg-wc-dark px-4 py-3">
               <p className="text-sm font-semibold text-white">Tổng đóng góp theo thành viên</p>
@@ -221,7 +225,7 @@ export default function StatsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {userTotals.map((u) => (
+                  {displayContributionTotals.map((u) => (
                     <tr key={u.userStt} className="border-b last:border-0 hover:bg-gray-50">
                       <td className="px-4 py-2.5 font-medium text-gray-600">{u.userStt}</td>
                       <td className="px-4 py-2.5 font-medium text-wc-dark">{u.userName}</td>
