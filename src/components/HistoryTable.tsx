@@ -1,5 +1,12 @@
-import { formatContribution, formatHandicapLine } from "@/lib/utils";
+import { formatHandicapLine } from "@/lib/utils";
 import { choiceLabels, formatChoiceLabel, getChoiceBadgeClass } from "@/lib/choice-styles";
+import {
+  countOutcomeFromContributions,
+  formatPredictionOutcome,
+  getOutcomeBadgeClass,
+  getPredictionOutcome,
+  type OutcomeSummary,
+} from "@/lib/prediction-outcome";
 import type { Choice } from "@/types";
 
 export interface HistoryItem {
@@ -22,20 +29,31 @@ export interface HistoryItem {
 
 export function HistoryTable({
   history,
-  totalContribution,
+  outcomeTotals,
 }: {
   history: HistoryItem[];
-  totalContribution: number;
+  outcomeTotals: OutcomeSummary;
 }) {
   if (history.length === 0) {
     return <p className="text-center text-gray-500 py-8">Chưa có lịch sử dự đoán</p>;
   }
 
+  const computedTotals =
+    outcomeTotals.win + outcomeTotals.draw + outcomeTotals.lose > 0
+      ? outcomeTotals
+      : countOutcomeFromContributions(history.map((h) => h.contribution));
+
   return (
     <div>
       <div className="mb-4 rounded-xl bg-wc-dark p-4 text-white">
-        <p className="text-sm text-green-200">Tổng đóng góp</p>
-        <p className="text-3xl font-bold text-wc-gold">{totalContribution}</p>
+        <p className="text-sm text-green-200">Tổng kết quả</p>
+        <p className="mt-1 text-lg font-bold">
+          <span className="text-green-400">Thắng: {computedTotals.win}</span>
+          <span className="mx-2 text-gray-400">·</span>
+          <span className="text-gray-300">Hòa: {computedTotals.draw}</span>
+          <span className="mx-2 text-gray-400">·</span>
+          <span className="text-red-400">Thua: {computedTotals.lose}</span>
+        </p>
       </div>
       <div className="space-y-3">
         {history.map((h) => (
@@ -66,11 +84,9 @@ export function HistoryTable({
                 </p>
               </div>
               <span
-                className={`text-lg font-bold ${
-                  h.contribution === 0 ? "text-green-600" : h.contribution ? "text-red-600" : "text-gray-400"
-                }`}
+                className={`text-lg font-bold ${getOutcomeBadgeClass(getPredictionOutcome(h.contribution))}`}
               >
-                {formatContribution(h.contribution)}
+                {formatPredictionOutcome(h.contribution)}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap gap-2 text-sm">
@@ -92,5 +108,3 @@ export function HistoryTable({
     </div>
   );
 }
-
-

@@ -82,7 +82,7 @@ export default function DashboardPage() {
             href="/stats"
             className="shrink-0 rounded-lg bg-wc-gold px-3 py-1.5 text-sm font-semibold text-wc-dark hover:bg-yellow-400"
           >
-            Thống kê đóng góp
+            Xem BXH
           </Link>
         </div>
         {matches.length === 0 ? (

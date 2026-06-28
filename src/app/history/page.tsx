@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { HistoryTable, type HistoryItem } from "@/components/HistoryTable";
+import { countOutcomeFromContributions } from "@/lib/prediction-outcome";
 import type { SessionUser } from "@/types";
 
 export default function HistoryPage() {
   const router = useRouter();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,6 @@ export default function HistoryPage() {
       setUser(me.user);
       const data = await histRes.json();
       setHistory(data.history || []);
-      setTotal(data.totalContribution || 0);
       setLoading(false);
     }
     load();
@@ -32,12 +31,14 @@ export default function HistoryPage() {
 
   if (loading || !user) return <div className="flex min-h-screen items-center justify-center">Đang tải...</div>;
 
+  const outcomeTotals = countOutcomeFromContributions(history.map((h) => h.contribution));
+
   return (
     <div className="min-h-screen">
       <Header user={user} />
       <main className="mx-auto max-w-3xl px-4 py-6">
         <h2 className="mb-4 text-xl font-bold text-wc-dark">Lịch sử dự đoán</h2>
-        <HistoryTable history={history} totalContribution={total} />
+        <HistoryTable history={history} outcomeTotals={outcomeTotals} />
       </main>
     </div>
   );

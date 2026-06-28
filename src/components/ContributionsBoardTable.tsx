@@ -3,9 +3,20 @@
 import { formatGMT7 } from "@/lib/datetime";
 import { formatContribution, formatHandicapLine } from "@/lib/utils";
 import { formatChoiceLabel, getChoiceBadgeClass, choiceLabels } from "@/lib/choice-styles";
+import {
+  formatPredictionOutcome,
+  getOutcomeBadgeClass,
+  getPredictionOutcome,
+} from "@/lib/prediction-outcome";
 import type { PredictionBoardRow } from "@/lib/prediction-board";
 
-export function ContributionsBoardTable({ rows }: { rows: PredictionBoardRow[] }) {
+export function ContributionsBoardTable({
+  rows,
+  viewMode = "outcome",
+}: {
+  rows: PredictionBoardRow[];
+  viewMode?: "outcome" | "contribution";
+}) {
   if (rows.length === 0) {
     return <p className="py-8 text-center text-gray-500">Chưa có dữ liệu dự đoán</p>;
   }
@@ -54,7 +65,7 @@ export function ContributionsBoardTable({ rows }: { rows: PredictionBoardRow[] }
                     )}
                   </p>
                 </div>
-                {match.status === "settled" && (
+                {match.status === "settled" && viewMode === "contribution" && (
                   <div className="text-right">
                     <p className="text-[10px] text-green-200">Tổng đóng góp trận</p>
                     <p className="text-lg font-bold text-wc-gold">{matchContribution}</p>
@@ -70,7 +81,9 @@ export function ContributionsBoardTable({ rows }: { rows: PredictionBoardRow[] }
                     <th className="px-4 py-2 font-medium">STT</th>
                     <th className="px-4 py-2 font-medium">Họ tên</th>
                     <th className="px-4 py-2 font-medium">Lựa chọn</th>
-                    <th className="px-4 py-2 font-medium">Đóng góp</th>
+                    <th className="px-4 py-2 font-medium">
+                      {viewMode === "outcome" ? "Kết quả" : "Đóng góp"}
+                    </th>
                     <th className="px-4 py-2 font-medium">Thời gian chọn</th>
                   </tr>
                 </thead>
@@ -90,14 +103,18 @@ export function ContributionsBoardTable({ rows }: { rows: PredictionBoardRow[] }
                         </td>
                         <td
                           className={`px-4 py-2.5 font-bold ${
-                            row.contribution === 0
-                              ? "text-green-600"
-                              : row.contribution
-                                ? "text-red-600"
-                                : "text-gray-400"
+                            viewMode === "outcome"
+                              ? getOutcomeBadgeClass(getPredictionOutcome(row.contribution))
+                              : row.contribution === 0
+                                ? "text-green-600"
+                                : row.contribution
+                                  ? "text-red-600"
+                                  : "text-gray-400"
                           }`}
                         >
-                          {formatContribution(row.contribution)}
+                          {viewMode === "outcome"
+                            ? formatPredictionOutcome(row.contribution)
+                            : formatContribution(row.contribution)}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-gray-500">
                           {formatGMT7(row.createdAt)}

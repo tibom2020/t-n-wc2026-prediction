@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import {
   getPredictionBoardRows,
   getUserContributionTotals,
+  getUserOutcomeTotals,
 } from "@/lib/prediction-board";
 
 export async function GET() {
@@ -15,8 +16,9 @@ export async function GET() {
     const isAdmin = session.title === "admin";
     const rows = await getPredictionBoardRows({ closedOnly: !isAdmin });
     const userTotals = getUserContributionTotals(rows);
+    const userOutcomeTotals = getUserOutcomeTotals(rows);
 
-    return NextResponse.json({ rows, userTotals, total: rows.length, isAdmin });
+    return NextResponse.json({ rows, userTotals, userOutcomeTotals, total: rows.length, isAdmin });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Lỗi tải thống kê" }, { status: 500 });

@@ -6,5 +6,5 @@ import type { PredictionBoardRow } from "@/lib/prediction-board";
 export type AdminPredictionRow = PredictionBoardRow;
 
 export function AdminPredictionsTable({ rows }: { rows: PredictionBoardRow[] }) {
-  return <ContributionsBoardTable rows={rows} />;
+  return <ContributionsBoardTable rows={rows} viewMode="contribution" />;
 }

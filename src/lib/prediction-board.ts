@@ -1,5 +1,6 @@
 import { getPredictions, getMatches } from "@/lib/sheets";
 import { isVotingOpen } from "@/lib/match";
+import { getPredictionOutcome, sortUserOutcomeTotalsByRank, type UserOutcomeTotal } from "@/lib/prediction-outcome";
 import type { Choice } from "@/types";
 
 export interface PredictionBoardRow {
@@ -95,4 +96,30 @@ export function getUserContributionTotals(rows: PredictionBoardRow[]): UserContr
   }
 
   return Array.from(totals.values()).sort((a, b) => a.userStt - b.userStt);
+}
+
+export function getUserOutcomeTotals(rows: PredictionBoardRow[]): UserOutcomeTotal[] {
+  const totals = new Map<number, UserOutcomeTotal>();
+
+  for (const row of rows) {
+    const outcome = getPredictionOutcome(row.contribution);
+    if (outcome === "pending") continue;
+
+    const existing = totals.get(row.userStt);
+    if (existing) {
+      if (outcome === "win") existing.win += 1;
+      else if (outcome === "draw") existing.draw += 1;
+      else existing.lose += 1;
+    } else {
+      totals.set(row.userStt, {
+        userStt: row.userStt,
+        userName: row.userName,
+        win: outcome === "win" ? 1 : 0,
+        draw: outcome === "draw" ? 1 : 0,
+        lose: outcome === "lose" ? 1 : 0,
+      });
+    }
+  }
+
+  return sortUserOutcomeTotalsByRank(Array.from(totals.values()));
 }
