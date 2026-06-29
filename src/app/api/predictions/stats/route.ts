@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getPredictions } from "@/lib/sheets";
+import { getPredictions, getUsers, getMatches } from "@/lib/sheets";
+import { buildVotingStats } from "@/lib/voting-close";
 import type { Choice } from "@/types";
 
 export type PredictionStats = Record<Choice, number>;
@@ -10,8 +11,13 @@ export async function GET() {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const predictions = await getPredictions();
+    const [predictions, users, matches] = await Promise.all([
+      getPredictions(),
+      getUsers(),
+      getMatches(),
+    ]);
     const stats: Record<string, PredictionStats> = {};
+    const notChosen: Record<string, string[]> = {};
 
     for (const p of predictions) {
       if (!p.choice) continue;
@@ -21,7 +27,12 @@ export async function GET() {
       stats[p.matchId][p.choice] += 1;
     }
 
-    return NextResponse.json({ stats });
+    for (const match of matches) {
+      if (match.status !== "open") continue;
+      notChosen[match.matchId] = buildVotingStats(match.matchId, predictions, users).notChosen;
+    }
+
+    return NextResponse.json({ stats, notChosen });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Lỗi tải thống kê" }, { status: 500 });

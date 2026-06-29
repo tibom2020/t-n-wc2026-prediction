@@ -14,15 +14,18 @@ export function MatchCard({
   match,
   userChoice,
   stats,
+  pendingUsers = [],
   onPredict,
 }: {
   match: Match;
   userChoice?: Choice;
   stats?: PredictionStats;
+  pendingUsers?: string[];
   onPredict: (matchId: string, choice: Choice) => Promise<void>;
 }) {
   const [loading, setLoading] = useState<Choice | null>(null);
   const [error, setError] = useState("");
+  const [showPending, setShowPending] = useState(false);
   const allowDraw = canDrawOnHandicap(match.handicap);
   const isSettled = match.status === "settled";
   const votingOpen = isVotingOpen(match);
@@ -94,7 +97,46 @@ export function MatchCard({
         )}
 
         {match.status === "open" && (
-          <PredictionStatsBars stats={stats ?? { HOME: 0, AWAY: 0, DRAW: 0 }} choices={choices} />
+          <>
+            <PredictionStatsBars stats={stats ?? { HOME: 0, AWAY: 0, DRAW: 0 }} choices={choices} />
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowPending((v) => !v)}
+                className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                {showPending ? "Ẩn danh sách" : "Xem chưa chọn"}
+                {!showPending && pendingUsers.length > 0 && (
+                  <span className="ml-1.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">
+                    {pendingUsers.length}
+                  </span>
+                )}
+              </button>
+              {showPending && (
+                <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                  {pendingUsers.length === 0 ? (
+                    <p className="text-xs font-medium text-green-700">Tất cả thành viên đã chọn</p>
+                  ) : (
+                    <>
+                      <p className="mb-1.5 text-xs font-semibold text-gray-600">
+                        Chưa chọn ({pendingUsers.length})
+                      </p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {pendingUsers.map((name) => (
+                          <li
+                            key={name}
+                            className="rounded-full border border-red-200 bg-white px-2 py-0.5 text-xs font-medium text-red-800"
+                          >
+                            {name}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {isSettled && match.handicapResult && (

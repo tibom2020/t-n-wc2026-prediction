@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [predictions, setPredictions] = useState<Record<string, Choice>>({});
   const [stats, setStats] = useState<Record<string, PredictionStats>>({});
+  const [notChosen, setNotChosen] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -37,6 +38,7 @@ export default function DashboardPage() {
     if (statsRes.ok) {
       const statsData = await statsRes.json();
       setStats(statsData.stats || {});
+      setNotChosen(statsData.notChosen || {});
     }
     setLoading(false);
   }, [router]);
@@ -53,6 +55,7 @@ export default function DashboardPage() {
     if (!res.ok) throw new Error(data.error || "Lỗi");
     setPredictions((prev) => {
       const previous = prev[matchId];
+      const wasPending = !previous;
       setStats((statsPrev) => {
         const current = statsPrev[matchId] ?? { HOME: 0, AWAY: 0, DRAW: 0 };
         const next = { ...current };
@@ -64,6 +67,14 @@ export default function DashboardPage() {
         }
         return { ...statsPrev, [matchId]: next };
       });
+      if (wasPending && user) {
+        setNotChosen((pendingPrev) => {
+          const list = pendingPrev[matchId];
+          if (!list?.length) return pendingPrev;
+          const nextList = list.filter((name) => name !== user.fullName);
+          return { ...pendingPrev, [matchId]: nextList };
+        });
+      }
       return { ...prev, [matchId]: choice };
     });
   }
@@ -95,6 +106,7 @@ export default function DashboardPage() {
                 match={m}
                 userChoice={predictions[m.matchId]}
                 stats={stats[m.matchId] ?? { HOME: 0, AWAY: 0, DRAW: 0 }}
+                pendingUsers={notChosen[m.matchId] ?? []}
                 onPredict={handlePredict}
               />
             ))}
