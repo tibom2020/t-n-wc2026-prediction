@@ -22,7 +22,7 @@ export function getPhase1ContributionTotals(): UserContributionTotal[] {
       userName: row.userName,
       total: outcomeTotalToContribution(row),
     }))
-    .sort((a, b) => a.total - b.total || a.userStt - b.userStt);
+    .sort((a, b) => b.total - a.total || a.userStt - b.userStt);
 }
 
 export function resolveLeaderboardOutcomeTotals(
@@ -78,5 +78,5 @@ export function resolveLeaderboardContributionTotals(
     }
   }
 
-  return Array.from(merged.values()).sort((a, b) => a.total - b.total || a.userStt - b.userStt);
+  return Array.from(merged.values()).sort((a, b) => b.total - a.total || a.userStt - b.userStt);
 }

@@ -225,10 +225,17 @@ export default function StatsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayContributionTotals.map((u) => (
+                  {displayContributionTotals.map((u, index) => (
                     <tr key={u.userStt} className="border-b last:border-0 hover:bg-gray-50">
                       <td className="px-4 py-2.5 font-medium text-gray-600">{u.userStt}</td>
-                      <td className="px-4 py-2.5 font-medium text-wc-dark">{u.userName}</td>
+                      <td className="px-4 py-2.5 font-medium text-wc-dark">
+                        {index < 3 && (
+                          <span className="mr-1" aria-hidden>
+                            {LEADERBOARD_STICKERS[index]}
+                          </span>
+                        )}
+                        {u.userName}
+                      </td>
                       <td
                         className={`px-4 py-2.5 text-right font-bold ${
                           u.total === 0 ? "text-green-600" : "text-red-600"
