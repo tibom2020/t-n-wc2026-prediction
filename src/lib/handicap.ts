@@ -20,8 +20,9 @@ export function calcContribution(
   result: HandicapResult
 ): number {
   if (choice === result) return 0;
+  // Kết quả kèo hòa: chọn HOME/AWAY = -10
   if (result === "DRAW") return 10;
-  if (choice === "DRAW") return 10;
+  // Dự đoán sai (gồm chọn HÒA khi kết quả HOME/AWAY) = -30
   return 30;
 }
 

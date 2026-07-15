@@ -96,6 +96,6 @@ Vercel Hobby **không** cho cron mỗi phút. Dùng [cron-job.org](https://cron-
 | Kết quả | Đóng góp |
 |---------|----------|
 | Dự đoán đúng | 0 |
-| Chọn HOME/AWAY sai | 30 |
-| Chọn HÒA sai | 10 |
-| Chọn HÒA + kèo handicap hòa | 0 |
+| Dự đoán sai (HOME/AWAY/HÒA) | 30 |
+| Chọn HOME/AWAY khi kèo handicap hòa | 10 |
+| Chọn HÒA khi kèo handicap hòa | 0 |
